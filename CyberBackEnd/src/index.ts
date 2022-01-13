@@ -1,7 +1,7 @@
 //donde se lanza la aplicacion
 
 import app from './app'
-import './database';
+//import './database';
 import {rsaInit} from './controller/rsa.controller';
 
 

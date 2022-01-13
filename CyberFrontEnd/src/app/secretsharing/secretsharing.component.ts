@@ -33,7 +33,8 @@ export class SecretsharingComponent implements OnInit {
 
      this.cifrarRSA.getSecretSharedKeys(dataEnviar).subscribe(
       async (res) => {
-        console.log("secrets Shared keys", res)
+        console.log("*****SECRET SHARING****")
+        console.log("1 secrets Shared keys", res)
         this.sharedSecretsKeys = res;
 
       },
@@ -52,7 +53,7 @@ export class SecretsharingComponent implements OnInit {
 
      this.cifrarRSA.recoverySharedSecret(dataEnviar).subscribe(
       async (res) => {
-        console.log("El secreto compartido es", res['recovered'])
+        console.log("2 El secreto compartido es", res['recovered'])
         this.secretRecovery = res['recovered'];
 
       },

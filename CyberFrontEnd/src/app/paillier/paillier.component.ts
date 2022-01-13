@@ -17,13 +17,17 @@ export class PaillierComponent implements OnInit {
   publicKeyPaillier;
   votosTotales =[];
   totalResultados;
+  recuentoPaillierPartido1;
+  recuentoPaillierPartido2;
+  recuentoPaillierPartido3;
 
   constructor(private cifrarRSA: CifrarService) { }
 
   ngOnInit(): void {
     this.cifrarRSA.getPaillierKeys().subscribe(
       async (res) => {
-        console.log("LAs claves Paillier son", res['n'], res['g'])
+        console.log("*****PAILLIER*******")
+        //console.log("Las claves Paillier son", res['n'], res['g'])
         this.publicKeyPaillier = new paillierBigint.PublicKey(bigintConversion.hexToBigint(res['n']), bigintConversion.hexToBigint(res['g']))
         console.log("LA clave Publica Paillier es: ", this.publicKeyPaillier)
       },
@@ -63,18 +67,18 @@ export class PaillierComponent implements OnInit {
 
   async getRecuentoVotos(): Promise<void> {
     let votosTotalesAddition = BigInt(1);
-    console.log("votosTotales",this.votosTotales )
+    console.log("2 votosTotales cifrados",this.votosTotales )
     for (let i in this.votosTotales)
     {votosTotalesAddition = await this.publicKeyPaillier.addition(this.votosTotales[i],votosTotalesAddition )
     }
-    console.log( "total de votos encryptados", votosTotalesAddition)
+    console.log( " 3 Addition total de votos encryptados", votosTotalesAddition)
 
     let dataEnviar = { votos: bigintConversion.bigintToHex(votosTotalesAddition)  };
     this.cifrarRSA.getRecuentoVotosHomomorfico(dataEnviar).subscribe(
       async (res) => {
       console.log(res)
       this.totalResultados =  bigintConversion.hexToBigint(res['recuento'])
-      console.log("total de resultados ", this.totalResultados)
+      console.log("4 total de resultados ", this.totalResultados)
       //const votos = ("0000"+this.totalResultados).slice(-5)
       //console.log("total votos", votos)
       const digits = this.totalResultados.toString()
@@ -82,10 +86,16 @@ export class PaillierComponent implements OnInit {
       console.log( "votos partido 1 ", digits.substr(0,2))
       console.log( "votos partido 2 ", digits.substr(2,2))
       console.log( "votos partido 3 ", digits.substr(4,2))
+      this.recuentoPaillierPartido1 = digits.substr(0,2);
+      this.recuentoPaillierPartido2 = digits.substr(2,2);
+      this.recuentoPaillierPartido3 = digits.substr(4,2);
       }else{
         console.log( "votos partido 1 ", digits.substr(0,1))
         console.log( "votos partido 2 ", digits.substr(1,2))
         console.log( "votos partido 3 ", digits.substr(3,2))
+        this.recuentoPaillierPartido1 = digits.substr(0,1);
+        this.recuentoPaillierPartido2 = digits.substr(1,2);
+        this.recuentoPaillierPartido3 = digits.substr(3,2);
       }
       },
       (err) => {

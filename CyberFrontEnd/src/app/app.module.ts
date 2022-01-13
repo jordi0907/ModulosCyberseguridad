@@ -35,11 +35,11 @@ import { SecretsharingComponent } from './secretsharing/secretsharing.component'
     ReactiveFormsModule
   ],
   providers: [
-    {
+   /*  {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
       multi: true
-    }
+    } */
 ],
   bootstrap: [AppComponent]
 })

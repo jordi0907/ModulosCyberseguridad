@@ -51,11 +51,12 @@ function createToken(user: IPersona) {
 }
 
 export async function rsaInit(){ 
-  console.log("Generando claves RSA")
+  console.log("*********Iniciando Aplicacion**********")
+  console.log("**********Generando claves RSA**********")
  
   keyPair = await rsa.generateKeys(2048);
  
-  console.log("Publica RSA: ", keyPair.publicKey);
+  console.log("1 Publica RSA Servidor: ", keyPair.publicKey);
 
   
 }
@@ -64,7 +65,8 @@ export async function rsaInit(){
 // coger clave publica
 export async function getPublicKeyRSA(req: Request, res: Response) {
   //keyPair = await rsa.generateKeys(2048);
-  console.log("keyRSA", keyPair.publicKey)
+ // console.log("keyRSA", keyPair.publicKey)
+ console.log("Enviando clave publica")
   try {
      let data = {
       e: await bc.bigintToHex(keyPair.publicKey.e),
@@ -82,11 +84,12 @@ export async function getPublicKeyRSA(req: Request, res: Response) {
 
 export async function descifrarRSA(req: Request, res: Response) {
   let mensaje = req.body.msg;  
-  console.log("mensaje para descifrar", mensaje)
+  console.log("********Descifrar RSA*******")
+  console.log("1 mensaje para descifrar con clave privada del servidor", mensaje)
   try {
     const mensajeDescifrado: bigint = await keyPair.privateKey.decrypt(bigintConversion.hexToBigint(mensaje));
     const mensajeFinal: string = bigintConversion.bigintToText(mensajeDescifrado)
-    console.log("mensaje descifrado", mensajeFinal)
+    console.log("2 mensaje descifrado", mensajeFinal)
     let data = {msg: mensajeFinal }
     res.status(200).send(data);
   } catch (err) {
@@ -98,27 +101,33 @@ export async function descifrarRSAHash(req: Request, res: Response) {
   let mensaje = req.body.msg;
   let signature= req.body.signature; 
   
-  console.log("el hash es", signature)
-  console.log("mensaje para descifrar", mensaje)
+
   keyPublicCliente = new rsa.RsaPublicKey(
     bigintConversion.hexToBigint(req.body.e),
     bigintConversion.hexToBigint(req.body.n)
   );
+
+  console.log("1 el signature enviado es", signature)
+  console.log("2 el mensaje para descifrar es", mensaje)
+  console.log("3 la clave publica del cliente es ", keyPublicCliente)
+  
   try {
     const digest: string = await sha.digest(bigintConversion.bigintToText(bigintConversion.hexToBigint(mensaje)), 'SHA-512')
     const mensajeDescifrado: bigint = await keyPair.privateKey.decrypt(bigintConversion.hexToBigint(mensaje));
     const mensajeFinal: string = bigintConversion.bigintToText(mensajeDescifrado)
-    console.log("mensaje descifrado", mensajeFinal)
+    console.log("4 mensaje descifrado", mensajeFinal)
     
     const digestSignature: bigint = await keyPublicCliente.verify(bigintConversion.hexToBigint(signature));
     const digestSignatureFinal: string = bigintConversion.bigintToText(digestSignature)
-    console.log("digest Signature bigint",digestSignature)
-    console.log("digest Signature",digestSignatureFinal)
-    console.log("digest", digest)
+    //console.log("digest Signature bigint",digestSignature)
+    
+    console.log("5 el digest del mensaje cifrado es ", digest)
+    console.log("6 la firma verificada es ",digestSignatureFinal)
     if (digestSignatureFinal == digest){
+      console.log("7 esta autenticado, son iguales digest y firma verificada ")
       let data = {msg: mensajeFinal }
       res.status(200).send(data);
-       console.log("esta autenticado")}
+       }
     else {
       res.status(400).send({msg: "No esta autenticado, ERROR"});
     }
@@ -140,7 +149,9 @@ export async function getSecretSharedKeys(req: Request, res: Response) {
   shares.forEach((share: Buffer) => {
     sharesHex.push(bigintConversion.bufToHex(share));
   })
-  console.log("Shared secrets keys",shares )
+  console.log("********Secret Sharing********")
+  console.log("1 Shared secrets keys",shares )
+
   
 
   try { 
@@ -155,12 +166,12 @@ export async function getSecretSharedKeys(req: Request, res: Response) {
 export async function recoverySharedSecret(req: Request, res: Response) {
   const sharedSecretsKeys: string[] = req.body.keysRecovery
   //const sharesHex: string[] = [];
-  console.log("las claves para recovery son:", sharedSecretsKeys)
+  console.log(" 2 las claves para recovery son:", sharedSecretsKeys)
  
   const sss = require('shamirs-secret-sharing');
   
   const recovered = sss.combine(sharedSecretsKeys)
-  console.log("Shared secrets", bigintConversion.bufToText(recovered) )
+  console.log(" 3 Combine Shared secrets", bigintConversion.bufToText(recovered) )
   
 
   try { 
@@ -178,7 +189,8 @@ export async function getPaillierKeys(req: Request, res: Response) {
   privateKeyPailler = privateKey;  
 
 
-  console.log("Publica Paillier: ", bigintConversion.bigintToHex(publicKey.n));
+  console.log("**********PAILLIER***********")
+  console.log("1 Publica Paillier: ", bigintConversion.bigintToHex(publicKey.n));
   //console.log("Privada Paillier: ", privateKeyPaillier);
     res.status(200).send({n: bigintConversion.bigintToHex(publicKey.n),
     g: bigintConversion.bigintToHex(publicKey.g)});
@@ -189,7 +201,7 @@ export async function getPaillierKeys(req: Request, res: Response) {
 export async function getRecuentoVotosHomomorfico(req: Request, res: Response) {
   let votos = req.body.votos;
   const recuento: bigint = privateKeyPailler.decrypt(bigintConversion.hexToBigint(votos))
-  console.log("recuento", recuento)
+  console.log("2 DESENCRIPTAR recuento", recuento)
   const recuentoHex: string = bigintConversion.bigintToHex(recuento)
   try {
    
@@ -215,12 +227,15 @@ export async function cifrarRSA(req: Request, res: Response) {
 
 export async function signRSA(req: Request, res: Response) {
   let mensaje = req.body.msg;
-  console.log("req", req.body);
-  console.log("req user", req.user);
+  console.log("****FIRMA Servidor****")
+  console.log("1 mensaje cifrado y cegado recibido", req.body);
+  //console.log("req user", req.user);
   
   try {
     const mensajecifrado: bigint = await keyPair.privateKey.sign(bigintConversion.hexToBigint(mensaje));
+    console.log("2 mensaje cifrado y cegado y ahora firmado por el servidor", mensajecifrado);
     res.status(200).json({msg : bigintConversion.bigintToHex(mensajecifrado)});
+
    // const Usercensado = await Persona.findById(req.user);;
    // const UsercensadoAct = await Persona.findByIdAndUpdate(req.user, {$set: {"censado": "true"}},{new:true});;
 /*     if (Usercensado){
@@ -248,12 +263,14 @@ export async function votarRSA(req: Request, res: Response) {
     const firmaVerif: bigint = await keyPair.publicKey.verify(bigintConversion.hexToBigint(firma))
     const votoCifradoBigInt: bigint = await (bigintConversion.hexToBigint(votoCifrado))
     if(firmaVerif===votoCifradoBigInt){
-      console.log("Verificado el voto")
+      console.log("3Mensaje Cifrado", votoCifradoBigInt)
+      console.log("4firma verificada", firmaVerif)
+      console.log("5 El mensaje cifrado = firma verificada")
       let votoDescifrado: bigint = await keyPair.privateKey.decrypt((votoCifradoBigInt))
       let votoDescifradoText = await (bigintConversion.bigintToText(votoDescifrado))
-      console.log("el voto ha sido," , votoDescifradoText)
-      res.status(200).json({msg : "voto añadido", voto: votoDescifradoText});
-      const savedResultado = await Voto.create({"voto": votoDescifradoText});
+      console.log("6 el mensaje ha sido," , votoDescifradoText)
+      res.status(200).json({msg : "mensaje descifrado", voto: votoDescifradoText});
+     // const savedResultado = await Voto.create({"voto": votoDescifradoText});
     }else{
       res.status(200).json({msg : "error en el voto añadido"});
     }
