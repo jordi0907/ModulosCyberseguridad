@@ -106,7 +106,7 @@ export async function descifrarRSAHash(req: Request, res: Response) {
     bigintConversion.hexToBigint(req.body.e),
     bigintConversion.hexToBigint(req.body.n)
   );
-
+  console.log("******* DESCIFRAR Y AUTENTICAR*******")
   console.log("1 el signature enviado es", signature)
   console.log("2 el mensaje para descifrar es", mensaje)
   console.log("3 la clave publica del cliente es ", keyPublicCliente)

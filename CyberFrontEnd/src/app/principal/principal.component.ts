@@ -265,7 +265,7 @@ export class PrincipalComponent implements OnInit {
 
                 let votoCifradoVerificado = this.claveRSApubServ.verify(mensajeDescegadoFirma)
 
-                console.log('5 Verificamos Firma con publica del cliente', votoCifradoVerificado);
+                console.log('5 Verificamos Firma con publica del Servidor', votoCifradoVerificado);
 
               /*   console.log("publicServ", this.claveRSApubServ)
                 console.log("voto verificado", votoCifradoVerificado)
